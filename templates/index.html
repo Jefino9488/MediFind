@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hospital Finder</title>
+</head>
+<body>
+<h1>Find Hospitals</h1>
+<form id="searchForm">
+<input type="text" id="country" placeholder="Country" required>
+<input type="text" id="state" placeholder="State" required>
+<input type="text" id="district" placeholder="District" required>
+<input type="text" id="area" placeholder="Area" required>
+<button type="submit">Search</button>
+</form>
+<div id="results"></div>
+<script>
+document.getElementById("searchForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    var country = document.getElementById("country").value;
+    var state = document.getElementById("state").value;
+    var district = document.getElementById("district").value;
+    var area = document.getElementById("area").value;
+    fetch(`/${country}/${state}/${district}/${area}/hospitals`)
+    .then(response => {
+        if (!response.ok) throw new Error('No hospitals found');
+        return response.json();
+    })
+    .then(data => {
+        var html = `<p>${data.message}</p>`;
+        if (data.hospitals && data.hospitals.length > 0) {
+            data.hospitals.forEach(function(hospital){
+                html += "<p>" + hospital.name + " - " + hospital.address + " (" + hospital.lat + ", " + hospital.lon + ")" +
+                        (hospital.distance !== null ? " - " + hospital.distance.toFixed(2) + " km away" : "") + "</p>";
+            });
+        }
+        document.getElementById("results").innerHTML = html;
+    })
+    .catch(error => {
+        document.getElementById("results").innerHTML = `<p>Error: ${error.message}</p>`;
+    });
+});
+</script>
+</body>
+</html>
